@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+//npm install nostr-tools
 const { generateSecretKey, getPublicKey, nip19 } = require('nostr-tools');
 
 function generateNostrKeyPair() {
