@@ -6,7 +6,7 @@ import {Filter} from "nostr-tools/lib/types/filter"
 
 export class QueryEventsProcessor implements NostrliveryEventProcessor {
 
-    private relayService = new RelayService()
+    private relayService = RelayService.getInstance()
 
     async process(npub:string, params: { filter: Filter }): Promise<NostrEvent | null> {
         const sk = nip19.decode(process.env.NOSTRLIVERY_NODE_NSEC)

@@ -84,8 +84,8 @@ data_directory = "db"
 # Bind to this network address
 address = "0.0.0.0"
 
-# Listen on this port
-port = 8080
+# Listen on this port (apps default to ws://127.0.0.1:7000 — keep in sync)
+port = 7000
 
 # If present, read this HTTP header for logging client IP addresses.
 # Examples for common proxies, cloudflare:
@@ -152,7 +152,7 @@ reject_future_seconds = 1800
 
 # Event kind allowlist. Events other than these kinds will be discarded.
 event_kind_allowlist = [
-    0, 1, 2, 3, 7, 40, 41, 42, 43, 44, 30023, 20000,
+    0, 1, 2, 3, 7, 40, 41, 42, 43, 44, 1000, 20000, 30000, 30023, 31200,
 ]
 
 # Rejects imprecise requests (kind only and author only etc)

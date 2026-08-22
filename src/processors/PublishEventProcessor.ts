@@ -5,7 +5,7 @@ import {NostrEvent} from "../model/NostrEvent"
 
 export class PublishEventProcessor implements NostrliveryEventProcessor {
 
-    private relayService = new RelayService()
+    private relayService = RelayService.getInstance()
 
     async process(npub:string, params: { event: NostrEvent }): Promise<NostrEvent | null> {
         try {

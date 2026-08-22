@@ -17,6 +17,10 @@ import {RelayService} from "./service/RelayService"
 
 config()
 
+process.on('unhandledRejection', (reason) => {
+    console.warn('Unhandled promise rejection:', reason)
+})
+
 ;(globalThis as any).WebSocket = WebSocket
 
 const app = express()
@@ -25,7 +29,7 @@ const port = 3000
 
 openDb()
 
-export const relayService = new RelayService()
+export const relayService = RelayService.getInstance()
 
 const eventProcessorFactory = new NostrliveryEventProcessorFactory()
 const profileService = new ProfileService()
@@ -102,6 +106,6 @@ app.post('/entrypoint', async (req, res) => {
 
 })
 
-app.listen(port, () => {
-    return console.log(`Express is listening at http://localhost:${port}`)
+app.listen(port, '0.0.0.0', () => {
+    return console.log(`Express is listening at http://0.0.0.0:${port}`)
 })

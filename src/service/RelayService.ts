@@ -1,11 +1,22 @@
 import {Relay} from "nostr-tools"
 import {Filter} from "nostr-tools/lib/types/filter"
+import WebSocket from "ws"
 import {sleep} from "../util/utils"
 import {NostrEvent} from "../model/NostrEvent"
 
+;(globalThis as any).WebSocket = WebSocket
+
 export class RelayService {
+    private static instance: RelayService | null = null
     public relayList: Relay[]
     timeoutMs = 2000
+
+    static getInstance(): RelayService {
+        if (!RelayService.instance) {
+            RelayService.instance = new RelayService()
+        }
+        return RelayService.instance
+    }
 
     constructor() {
         if (!process.env['RELAY_URL_LIST']) {
@@ -23,11 +34,27 @@ export class RelayService {
             }
         })
 
-        // Connect to relay with error handling
-        if (this.relayList.length > 0) {
-            this.relayList[0].connect().catch(error => {
-                console.warn('Failed to connect to relay:', error.message)
-            })
+        this.connectAll().catch(error => {
+            console.warn('Failed to connect to relay:', formatRelayError(error))
+        })
+    }
+
+    private async connectAll() {
+        for (const relay of this.relayList) {
+            await this.ensureConnected(relay)
+        }
+    }
+
+    private async ensureConnected(relay: Relay) {
+        if (relay.connected) {
+            return
+        }
+
+        try {
+            await relay.connect()
+            console.log(`Connected to relay ${relay.url}`)
+        } catch (error) {
+            console.warn(`Failed to connect to relay ${relay.url}:`, formatRelayError(error))
         }
     }
 
@@ -55,8 +82,11 @@ export class RelayService {
     }
 
     private async collectEventsFromRelay(filter: Filter) {
+        const relay = this.relayList[0]
+        await this.ensureConnected(relay)
+
         const events = []
-        const subscription = this.relayList[0].subscribe(
+        const subscription = relay.subscribe(
             [filter],
             {
 
@@ -82,6 +112,7 @@ export class RelayService {
 
     async publish(event: NostrEvent) {
         const relay = this.relayList[0]
+        await this.ensureConnected(relay)
         try {
             return await relay.publish(event)
         } catch (e) {
@@ -89,4 +120,11 @@ export class RelayService {
         }
     }
 
+}
+
+function formatRelayError(error: unknown): string {
+    if (error instanceof Error) {
+        return error.message
+    }
+    return String(error)
 }
